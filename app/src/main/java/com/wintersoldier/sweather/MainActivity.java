@@ -1,6 +1,7 @@
 package com.wintersoldier.sweather;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,6 +10,7 @@ import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static android.content.ContentValues.TAG;
 
@@ -34,6 +36,11 @@ import static android.content.ContentValues.TAG;
 public class MainActivity extends Activity {
     // rainbow hat display
     private AlphanumericDisplay alphanumericDisplay;
+    private Apa102 ledStrip;
+
+    // Default LED brightness
+    private static final int LEDSTRIP_BRIGHTNESS = 1;
+    private static final int LEDSTRIP_BRIGHTNESS_OFF = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +58,40 @@ public class MainActivity extends Activity {
 
         } catch (IOException exception) {
             throw new RuntimeException("Error initializing 7 digit display: " + exception.getMessage());
+        }
+
+        // initialize the LED strip
+        try {
+            this.ledStrip = RainbowHat.openLedStrip();
+            this.ledStrip.setBrightness(LEDSTRIP_BRIGHTNESS);
+
+            int[] colors = new int[7];
+            Arrays.fill(colors, Color.RED);
+            this.ledStrip.write(colors);
+
+            // again due to known issue
+            this.ledStrip.write(colors);
+
+            // loop
+            for (int i = 0; i < colors.length; i++) {
+                Thread.sleep(500);
+                colors = new int[7];
+                colors[i] = Color.RED;
+                this.ledStrip.write(colors);
+                Thread.sleep(500);
+            }
+
+            // turn LEDs off
+            this.ledStrip.write(new int[7]);
+
+            // log
+            Log.d(TAG, "Initialized LED strip");
+
+        } catch (InterruptedException exception) {
+            throw new RuntimeException("Error initializing LED strip loop: " + exception.getMessage());
+
+        } catch (IOException exception) {
+            throw new RuntimeException("Error initializing LED strip: " + exception.getMessage());
         }
 
 //        setContentView(R.layout.activity_main);
@@ -72,6 +113,21 @@ public class MainActivity extends Activity {
 
             } finally {
                 this.alphanumericDisplay = null;
+            }
+        }
+
+        // close the LED strip
+        if (this.ledStrip != null) {
+            try {
+                this.ledStrip.setBrightness(LEDSTRIP_BRIGHTNESS_OFF);
+                this.ledStrip.write(new int[7]);
+                this.ledStrip.close();
+
+            } catch (IOException exception) {
+                Log.e(TAG, "Error closing LED strip: " + exception.getMessage());
+
+            } finally {
+                this.ledStrip = null;
             }
         }
     }
