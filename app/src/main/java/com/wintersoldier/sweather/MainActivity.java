@@ -11,6 +11,7 @@ import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import static android.content.ContentValues.TAG;
 
@@ -53,7 +54,7 @@ public class MainActivity extends Activity {
         try {
             alphanumericDisplay = RainbowHat.openDisplay();
             alphanumericDisplay.setEnabled(true);
-            alphanumericDisplay.display("4321");
+            alphanumericDisplay.display("1224");
             Log.d(TAG, "Initialized the 7 digit display");
 
         } catch (IOException exception) {
@@ -80,6 +81,46 @@ public class MainActivity extends Activity {
                 this.ledStrip.write(colors);
                 Thread.sleep(500);
             }
+
+            // set x-mas colors
+            colors = new int[7];
+            for (int i = 0; i < colors.length; i++) {
+                if ((i % 2) == 0) {
+                    if ((i % 4) == 0) {
+                        colors[i] = Color.RED;
+
+                    } else {
+                        colors[i] = Color.GREEN;
+                    }
+                }
+            }
+            this.ledStrip.write(colors);
+            Thread.sleep(1000);
+
+            // set blinking colors
+//            int clockCounter = 10;
+//            for (int clock = 0; clock < clockCounter; clock++) {
+//                colors = new int[7];
+//
+//                for (int i = 0; i < colors.length; i++) {
+//                    int modNumber = (i + (clock % 2));
+//                    if ((modNumber % 2) == 0) {
+//                        if ((modNumber % 4) == 0) {
+//                            colors[i] = Color.RED;
+//
+//                        } else {
+//                            colors[i] = Color.GREEN;
+//                        }
+//                    }
+//                }
+//
+//                // log
+//                Log.d(TAG, "Colors are: " + colors.toString());
+//
+//                // set colors
+//                this.ledStrip.write(colors);
+//                Thread.sleep(1000);
+//            }
 
             // turn LEDs off
             this.ledStrip.write(new int[7]);
@@ -108,6 +149,9 @@ public class MainActivity extends Activity {
                 this.alphanumericDisplay.setEnabled(false);
                 this.alphanumericDisplay.close();
 
+                // log
+                Log.d(TAG, "Closing 7 digit display");
+
             } catch (IOException exception) {
                 Log.e(TAG, "Error closing 7 digit display: " + exception.getMessage());
 
@@ -122,6 +166,9 @@ public class MainActivity extends Activity {
                 this.ledStrip.setBrightness(LEDSTRIP_BRIGHTNESS_OFF);
                 this.ledStrip.write(new int[7]);
                 this.ledStrip.close();
+
+                // log
+                Log.d(TAG, "Closing LED strip");
 
             } catch (IOException exception) {
                 Log.e(TAG, "Error closing LED strip: " + exception.getMessage());
